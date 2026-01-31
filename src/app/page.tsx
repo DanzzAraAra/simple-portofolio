@@ -1,17 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Github, Play, Pause, SkipForward, SkipBack, Heart, Shuffle, Repeat, Camera, Send, MessageCircle, Music, Code2, Sparkles, Book, Globe, Server } from "lucide-react";
+import { motion } from "framer-motion";
+import { Code2, ExternalLink, Github, Zap, Play, Pause, SkipForward, SkipBack, Heart, ListMusic, Repeat, Shuffle, Music, Camera, Send, MessageCircle, Mail } from "lucide-react";
 
-// --- TYPES ---
 type Project = {
   title: string;
   category: string;
   url: string;
   description: string;
   tech: string[];
-  icon: any;
 };
 
 type Track = {
@@ -21,40 +19,35 @@ type Track = {
   url: string;
 };
 
-// --- DATA ---
 const personalInfo = {
   name: "Dandi Eka Saputra",
   role: "Backend Developer",
-  bio: "Backend Developer dengan spesialisasi dalam membangun sistem server-side yang tangguh. Berfokus pada skalabilitas, keamanan, dan efisiensi data menggunakan ekosistem Modern Javascript.",
+  bio: "Backend Developer dengan spesialisasi dalam membangun sistem server-side yang tangguh dan pipeline data yang efisien. Berpengalaman dalam pengembangan REST API, integrasi database, dan optimasi performa sistem. Menggunakan MongoDB sebagai database backend untuk solusi yang skalabel dan fleksibel.",
   heroGif: "/thumbnail.gif", 
   birthDate: "2008-04-11",
 };
 
-// Updated Projects List
 const projects: Project[] = [
   {
     title: "REST API",
-    category: "Infrastructure",
+    category: "Backend Infrastructure",
     url: "https://api.danzy.web.id",
-    description: "Layanan Public API berkinerja tinggi yang dirancang untuk skalabilitas. Menyediakan berbagai endpoint utilitas dengan dokumentasi lengkap.",
-    tech: ["TypeScript", "Node.js", "Express", "MongoDB"],
-    icon: Server
+    description: "Robust REST API service built with Express.js and TypeScript, featuring comprehensive documentation.",
+    tech: ["Express.js", "Typescript", "HTML", "CSS"],
   },
   {
     title: "Class Website",
-    category: "Academic Platform",
+    category: "Full Stack",
     url: "https://xiitjktb.web.id",
-    description: "Platform digital terpusat untuk manajemen kelas XII TJKT B. Fitur meliputi jadwal pelajaran, galeri siswa, dan portal informasi.",
-    tech: ["Next.js", "React", "Tailwind", "MongoDB"],
-    icon: Globe
+    description: "Dynamic class management platform with server-side rendering for educational collaboration.",
+    tech: ["EJS", "Typescript", "MongoDB"],
   },
   {
     title: "Diary",
-    category: "Personal Blog",
+    category: "Web Application",
     url: "https://sylvatica.my.id",
-    description: "'Sylvatica' - Sebuah ruang digital personal untuk mencatat memori, pemikiran, dan cerita sehari-hari dengan antarmuka yang tenang.",
+    description: "Personal diary application with modern architecture using Astro framework and MongoDB database.",
     tech: ["Astro", "Typescript", "MongoDB"],
-    icon: Book
   },
 ];
 
@@ -84,40 +77,39 @@ const socialMedia = [
     name: "TikTok",
     url: "https://www.tiktok.com/@danzz_yyyyyy?_r=1&_t=ZS-93J7njg239d",
     icon: Music,
-    color: "group-hover:text-pink-400",
-    bgColor: "hover:bg-pink-500/10 hover:border-pink-500/30"
+    color: "hover:text-[#FF0050]",
+    bgColor: "bg-gradient-to-br from-[#FF0050]/10 to-[#FF0050]/5"
   },
   {
     name: "Instagram",
     url: "https://www.instagram.com/danzz_foryu?igsh=MXhwcHpuamY2NHgxNQ==",
     icon: Camera,
-    color: "group-hover:text-purple-400",
-    bgColor: "hover:bg-purple-500/10 hover:border-purple-500/30"
+    color: "hover:text-[#E4405F]",
+    bgColor: "bg-gradient-to-br from-[#E4405F]/10 to-[#833AB4]/5"
   },
   {
     name: "Telegram",
     url: "https://t.me/DanzzAraAra",
     icon: Send,
-    color: "group-hover:text-sky-400",
-    bgColor: "hover:bg-sky-500/10 hover:border-sky-500/30"
+    color: "hover:text-[#26A5E4]",
+    bgColor: "bg-gradient-to-br from-[#26A5E4]/10 to-[#0088cc]/5"
   },
   {
     name: "WhatsApp",
     url: "https://wa.me/84584810152",
     icon: MessageCircle,
-    color: "group-hover:text-emerald-400",
-    bgColor: "hover:bg-emerald-500/10 hover:border-emerald-500/30"
+    color: "hover:text-[#25D366]",
+    bgColor: "bg-gradient-to-br from-[#25D366]/10 to-[#128C7E]/5"
   },
   {
     name: "GitHub",
     url: "https://github.com/DanzzAraAra",
     icon: Github,
-    color: "group-hover:text-white",
-    bgColor: "hover:bg-white/10 hover:border-white/30"
+    color: "hover:text-white",
+    bgColor: "bg-gradient-to-br from-stone-800/30 to-stone-900/20"
   }
 ];
 
-// --- UTILS ---
 const calculateAge = (birthDateString: string) => {
   const birthDate = new Date(birthDateString);
   const today = new Date();
@@ -136,8 +128,6 @@ const formatTime = (time: number) => {
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
-// --- COMPONENTS ---
-
 const CanvasBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -148,11 +138,31 @@ const CanvasBackground = () => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let boxes: any[] = [];
     
-    // Soft warm colors for background
-    const colors = ["#fbbf24", "#f472b6", "#fb7185"]; 
-    const bgColor = "#0c0a09"; 
+    interface Point { x: number; y: number; }
+    
+    interface Box {
+      half_size: number;
+      x: number;
+      y: number;
+      r: number;
+      shadow_length: number;
+      color: string;
+      speed: number;
+      getDots: () => { p1: Point; p2: Point; p3: Point; p4: Point };
+      rotate: () => void;
+      draw: () => void;
+      drawShadow: () => void;
+    }
+
+    let boxes: Box[] = [];
+    
+    // Warna yang lebih lembut: lavender, pastel pink, pastel blue
+    const colors = ["#C4B5FD", "#FBCFE8", "#BFDBFE"]; 
+    const bgColor = "#FAFAF9"; // stone-50 yang lebih lembut
+    const lightColor = "#E7E5E4"; // stone-200 yang lembut
+    
+    const light = { x: 160, y: 200 };
 
     const resize = () => {
       if (c) {
@@ -161,45 +171,125 @@ const CanvasBackground = () => {
       }
     };
 
-    const createBox = () => {
+    function drawLight() {
+      if (!ctx) return;
+      ctx.beginPath();
+      ctx.arc(light.x, light.y, 1000, 0, 2 * Math.PI);
+      let gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, 1000);
+      gradient.addColorStop(0, lightColor); 
+      gradient.addColorStop(1, bgColor);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(light.x, light.y, 20, 0, 2 * Math.PI);
+      gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, 15);
+      gradient.addColorStop(0, "#FFFFFF");
+      gradient.addColorStop(1, lightColor);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+
+    const createBox = (): Box => {
       const width = c ? c.width : window.innerWidth;
       const height = c ? c.height : window.innerHeight;
-      let half_size = Math.floor((Math.random() * 20) + 10); // Smaller particles
+
+      let half_size = Math.floor((Math.random() * 15) + 25);
       let x = Math.floor((Math.random() * width) + 1);
       let y = Math.floor((Math.random() * height) + 1);
       let r = Math.random() * Math.PI;
+      const shadow_length = 2000;
       const color = colors[Math.floor((Math.random() * colors.length))];
-      const speed = (40 - half_size) / 40; // Slower movement
+      const speed = (60 - half_size) / 25;
+
+      const getDots = () => {
+        const full = (Math.PI * 2) / 4;
+        const p1 = { x: x + half_size * Math.sin(r), y: y + half_size * Math.cos(r) };
+        const p2 = { x: x + half_size * Math.sin(r + full), y: y + half_size * Math.cos(r + full) };
+        const p3 = { x: x + half_size * Math.sin(r + full * 2), y: y + half_size * Math.cos(r + full * 2) };
+        const p4 = { x: x + half_size * Math.sin(r + full * 3), y: y + half_size * Math.cos(r + full * 3) };
+        return { p1, p2, p3, p4 };
+      };
+
+      const rotate = () => {
+        r += speed * 0.002;
+        x += speed;
+        y += speed;
+      };
+
+      const draw = () => {
+        if (!ctx || !c) return;
+        const dots = getDots();
+        ctx.beginPath();
+        ctx.moveTo(dots.p1.x, dots.p1.y);
+        ctx.lineTo(dots.p2.x, dots.p2.y);
+        ctx.lineTo(dots.p3.x, dots.p3.y);
+        ctx.lineTo(dots.p4.x, dots.p4.y);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        if (y - half_size > c.height) { 
+          y = -half_size;
+          x = Math.random() * c.width;
+        }
+        if (x - half_size > c.width) { 
+          x = -half_size;
+          y = Math.random() * c.height;
+        }
+      };
+
+      const drawShadow = () => {
+        if (!ctx) return;
+        const dots = getDots();
+        const points: { endX: number; endY: number; startX: number; startY: number }[] = [];
+
+        Object.values(dots).forEach((dot) => {
+          const angle = Math.atan2(light.y - dot.y, light.x - dot.x);
+          const endX = dot.x + shadow_length * Math.sin(-angle - Math.PI / 2);
+          const endY = dot.y + shadow_length * Math.cos(-angle - Math.PI / 2);
+          points.push({ endX, endY, startX: dot.x, startY: dot.y });
+        });
+
+        for (let i = points.length - 1; i >= 0; i--) {
+          const n = i === 3 ? 0 : i + 1;
+          ctx.beginPath();
+          ctx.moveTo(points[i].startX, points[i].startY);
+          ctx.lineTo(points[n].startX, points[n].startY);
+          ctx.lineTo(points[n].endX, points[n].endY);
+          ctx.lineTo(points[i].endX, points[i].endY);
+          ctx.fillStyle = bgColor; 
+          ctx.fill();
+        }
+      };
 
       return {
-        x, y, r, half_size, color, speed,
-        draw: () => {
-          if (!ctx) return;
-          ctx.beginPath();
-          // Draw soft glowing circles instead of sharp squares
-          ctx.arc(x, y, half_size, 0, 2 * Math.PI);
-          ctx.fillStyle = color;
-          ctx.globalAlpha = 0.03; // Very subtle
-          ctx.fill();
-          
-          // Movement
-          y -= speed;
-          x += Math.sin(y * 0.01) * 0.5;
-
-          if (y < -50) {
-            y = height + 50;
-            x = Math.random() * width;
-          }
-        }
+        get half_size() { return half_size; },
+        set half_size(val) { half_size = val; },
+        get x() { return x; },
+        set x(val) { x = val; },
+        get y() { return y; },
+        set y(val) { y = val; },
+        get r() { return r; },
+        set r(val) { r = val; },
+        get shadow_length() { return shadow_length; },
+        get color() { return color; },
+        get speed() { return speed; },
+        getDots,
+        rotate,
+        draw,
+        drawShadow
       };
     };
 
     function draw() {
       if (!ctx || !c) return;
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = bgColor;
-      ctx.fillRect(0,0, c.width, c.height);
+      ctx.clearRect(0, 0, c.width, c.height);
+      drawLight();
 
+      for (let i = 0; i < boxes.length; i++) {
+        boxes[i].rotate();
+        boxes[i].drawShadow();
+      }
       for (let i = 0; i < boxes.length; i++) {
         boxes[i].draw();
       }
@@ -208,14 +298,23 @@ const CanvasBackground = () => {
 
     resize();
     boxes = [];
-    while (boxes.length < 30) {
+    while (boxes.length < 8) {
       boxes.push(createBox());
     }
     draw();
 
-    window.addEventListener("resize", resize);
+    const handleResize = () => resize();
+    const handleMouseMove = (e: MouseEvent) => {
+      light.x = e.clientX;
+      light.y = e.clientY;
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("mousemove", handleMouseMove);
+
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -223,7 +322,9 @@ const CanvasBackground = () => {
   return (
     <canvas 
       ref={canvasRef} 
-      className="fixed inset-0 z-0 w-full h-full pointer-events-none"
+      id="canvas"
+      className="fixed inset-0 z-0 w-full h-full bg-[#FAFAF9]"
+      style={{ display: "block" }}
     />
   );
 };
@@ -246,85 +347,147 @@ const MusicPlayer = () => {
     }
   }, [isPlaying, currentTrackIndex]);
 
-  const handleNext = () => setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
-  const handlePrev = () => setCurrentTrackIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setProgress(audioRef.current.currentTime);
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = Number(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setProgress(time);
+    }
+  };
+
+  const handleNext = () => {
+    setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentTrackIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
+  };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
       className="mt-6 w-full max-w-[320px] mx-auto"
     >
-      <div className="relative bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl p-6 flex flex-col gap-5 overflow-hidden group">
+      <div className="relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-stone-200/50 shadow-xl p-6 flex flex-col gap-5 overflow-hidden group hover:border-lavender-300 transition-all duration-500">
         
-        {/* Soft Glow Background */}
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 rounded-[32px]">
+           <img src={currentTrack.image} alt="blur" className="w-full h-full object-cover blur-3xl opacity-20 scale-150" />
+           <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/80 to-white"></div>
+        </div>
 
-        <div className="relative z-10">
-          <div className="flex gap-4 items-center mb-6">
-            <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg border border-white/10">
-               <img src={currentTrack.image} alt={currentTrack.title} className="w-full h-full object-cover animate-[spin_10s_linear_infinite]" style={{ animationPlayState: isPlaying ? 'running' : 'paused' }} />
-            </div>
-            <div className="flex-1 overflow-hidden">
-                <h3 className="font-bold text-stone-100 text-lg truncate">{currentTrack.title}</h3>
-                <p className="text-xs text-stone-400 truncate mt-1">{currentTrack.artist}</p>
-            </div>
-            <Heart size={20} className="text-stone-500 hover:text-rose-500 transition-colors cursor-pointer" />
+        <div className="relative z-10 flex flex-col">
+          <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-lg border border-white/30 mb-6 relative group/image">
+             <img src={currentTrack.image} alt={currentTrack.title} className="w-full h-full object-cover" />
+             <div className="absolute inset-0 bg-white/10 group-hover/image:bg-transparent transition-colors"></div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mb-4 group/slider">
-             <div className="relative w-full h-1 bg-stone-700/30 rounded-full overflow-hidden">
+          <div className="flex justify-between items-end mb-4 px-1">
+            <div className="flex-1 overflow-hidden mr-4">
+                <motion.h3 
+                  key={currentTrack.title}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="font-bold text-stone-800 text-xl truncate leading-tight"
+                >
+                  {currentTrack.title}
+                </motion.h3>
+                <motion.p 
+                  key={currentTrack.artist}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-sm text-stone-600 truncate mt-1"
+                >
+                  {currentTrack.artist}
+                </motion.p>
+            </div>
+            <button className="text-stone-500 hover:text-lavender-600 hover:scale-110 active:scale-90 transition-all">
+                <Heart size={24} />
+            </button>
+          </div>
+
+          <div className="mb-6 group/slider">
+             <div className="relative w-full h-1 bg-stone-300/50 rounded-full">
                 <div 
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-400 to-rose-400 rounded-full"
+                  className="absolute top-0 left-0 h-full bg-lavender-500 rounded-full"
                   style={{ width: `${currentPercentage}%` }}
                 ></div>
+                <input
+                  type="range"
+                  min="0"
+                  max={duration || 0}
+                  value={progress}
+                  onChange={handleSeek}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                />
+                <div 
+                   className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/slider:opacity-100 transition-opacity pointer-events-none"
+                   style={{ left: `${currentPercentage}%`, transform: `translate(-50%, -50%)` }}
+                ></div>
              </div>
-             <div className="flex justify-between text-[10px] text-stone-500 font-medium mt-1.5 font-mono">
+             <div className="flex justify-between text-[10px] text-stone-500 font-medium mt-2 font-mono">
                  <span>{formatTime(progress)}</span>
                  <span>{formatTime(duration)}</span>
              </div>
           </div>
 
-          {/* Controls */}
-          <div className="flex justify-between items-center px-1">
-             <Shuffle size={16} className="text-stone-600 hover:text-stone-300" />
-             <SkipBack size={24} onClick={handlePrev} className="text-stone-300 hover:text-white cursor-pointer" fill="currentColor" />
-             
-             <button 
-                onClick={() => setIsPlaying(!isPlaying)} 
-                className="w-12 h-12 rounded-full bg-stone-100 text-stone-900 flex items-center justify-center hover:scale-110 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all active:scale-95"
-             >
-                {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
+          <div className="flex justify-between items-center px-2">
+             <button className="text-stone-500 hover:text-stone-700 transition-colors">
+                <Shuffle size={18} />
              </button>
 
-             <SkipForward size={24} onClick={handleNext} className="text-stone-300 hover:text-white cursor-pointer" fill="currentColor" />
-             <Repeat size={16} className="text-stone-600 hover:text-stone-300" />
+             <div className="flex items-center gap-6">
+               <button onClick={handlePrev} className="text-stone-600 hover:text-stone-900 transition-colors">
+                  <SkipBack size={26} fill="currentColor" />
+               </button>
+               
+               <button 
+                  onClick={() => setIsPlaying(!isPlaying)} 
+                  className="w-14 h-14 rounded-full bg-stone-800 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-stone-300/50"
+               >
+                  {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+               </button>
+
+               <button onClick={handleNext} className="text-stone-600 hover:text-stone-900 transition-colors">
+                  <SkipForward size={26} fill="currentColor" />
+               </button>
+             </div>
+
+             <button className="text-stone-500 hover:text-stone-700 transition-colors">
+                <Repeat size={18} />
+             </button>
           </div>
         </div>
       </div>
-      <audio 
-        ref={audioRef} 
-        src={currentTrack.url} 
-        onTimeUpdate={() => audioRef.current && setProgress(audioRef.current.currentTime)}
-        onLoadedMetadata={() => audioRef.current && setDuration(audioRef.current.duration)}
-        onEnded={handleNext} 
-      />
+      <audio ref={audioRef} src={currentTrack.url} onTimeUpdate={handleTimeUpdate} onEnded={handleNext} />
     </motion.div>
   );
 };
 
 const JsonProfile = () => {
   const [age, setAge] = useState(0);
-  useEffect(() => setAge(calculateAge(personalInfo.birthDate)), []);
+
+  useEffect(() => {
+    setAge(calculateAge(personalInfo.birthDate));
+  }, []);
 
   const stackList = [
-    { name: "Node.js", color: "#86efac" }, // Soft Green
-    { name: "Mongo", color: "#fde047" },   // Soft Yellow
-    { name: "React", color: "#93c5fd" },   // Soft Blue
-    { name: "Next", color: "#cbd5e1" },    // Soft Grey
+    { name: "Go", color: "#4F46E5", opacityCycle: [0.3, 0.8, 0.3] },
+    { name: "TS", color: "#3B82F6", opacityCycle: [0.4, 0.9, 0.4] },
+    { name: "JS", color: "#F59E0B", opacityCycle: [0.5, 1, 0.5] },
+    { name: "React", color: "#06B6D4", opacityCycle: [0.3, 0.8, 0.3] },
+    { name: "Node.js", color: "#10B981", opacityCycle: [0.4, 0.9, 0.4] },
+    { name: "MongoDB", color: "#047857", opacityCycle: [0.5, 1, 0.5] },
+    { name: "Vite", color: "#8B5CF6", opacityCycle: [0.3, 0.8, 0.3] }
   ];
 
   return (
@@ -332,129 +495,236 @@ const JsonProfile = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="font-mono text-xs md:text-sm bg-stone-900/40 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl relative w-full hover:border-white/10 transition-colors"
+      className="font-mono text-sm bg-white/90 backdrop-blur-md p-5 rounded-xl border border-lavender-200 shadow-xl relative group w-full hover:border-lavender-300 transition-all duration-500"
     >
-      <div className="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
-        <div className="flex gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-          <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-          <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4 border-b border-lavender-200 pb-2">
+        <div className="w-3 h-3 rounded-full bg-lavender-400 animate-pulse" />
+        <div
+          className="w-3 h-3 rounded-full bg-pink-300 animate-pulse"
+          style={{ animationDelay: "0.2s" }}
+        />
+        <div
+          className="w-3 h-3 rounded-full bg-blue-300 animate-pulse"
+          style={{ animationDelay: "0.4s" }}
+        />
+        <span className="ml-2 text-[10px] uppercase tracking-widest text-lavender-600 font-bold">
+          profile.json
+        </span>
+        <div className="ml-auto flex gap-1">
+          <div className="w-1 h-1 rounded-full bg-lavender-400/60" />
+          <div className="w-1 h-1 rounded-full bg-lavender-400/40" />
+          <div className="w-1 h-1 rounded-full bg-lavender-400/20" />
         </div>
-        <span className="ml-auto text-[10px] text-stone-500">profile.json</span>
       </div>
 
-      <div className="text-stone-400 space-y-1">
-        <div><span className="text-rose-400">const</span> <span className="text-amber-300">developer</span> = {"{"}</div>
-        <div className="pl-4">
-          <div><span className="text-purple-300">name</span>: <span className="text-stone-200">"{personalInfo.name}"</span>,</div>
-          <div><span className="text-purple-300">age</span>: <span className="text-orange-300">{age}</span>,</div>
-          <div><span className="text-purple-300">status</span>: <span className="text-emerald-300">"Building Dreams"</span>,</div>
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="text-purple-300">stack</span>: [
-            {stackList.map((item, i) => (
-              <span key={i} style={{ color: item.color }}>"{item.name}"{i < stackList.length - 1 ? "," : ""}</span>
-            ))}
-            ]
-          </div>
-        </div>
-        <div>{"};"}</div>
-      </div>
-    </motion.div>
-  );
-};
+      {/* JSON Content */}
+      <div className="text-stone-700">
+        <span className="text-lavender-600">{`{`}</span>
 
-const ProjectCard = ({ project, active }: { project: Project; active: boolean }) => {
-  const Icon = project.icon;
-  return (
-    <motion.div
-      animate={{
-        scale: active ? 1 : 0.96,
-        opacity: active ? 1 : 0.6,
-        filter: active ? "blur(0px)" : "blur(1px)",
-      }}
-      className={`group relative h-[300px] flex flex-col justify-between p-8 rounded-3xl border transition-all duration-500 overflow-hidden ${
-        active 
-          ? "bg-white/5 border-white/10 shadow-[0_0_30px_rgba(251,146,60,0.05)]" 
-          : "bg-stone-900/20 border-white/5"
-      }`}
-    >
-      {/* Dynamic Background Gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700`}></div>
-      
-      <div className="relative z-10">
-        <div className="flex justify-between items-start mb-6">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-amber-200 group-hover:scale-110 transition-transform duration-300">
-             <Icon size={24} />
-          </div>
-          <a href={project.url} target="_blank" className="p-2 rounded-full hover:bg-white/10 transition-colors">
-            <ExternalLink size={20} className="text-stone-500 group-hover:text-stone-200" />
-          </a>
-        </div>
-        
-        <h3 className="text-2xl font-bold mb-3 text-stone-100 tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-amber-200 group-hover:to-rose-200 transition-all">
-          {project.title}
-        </h3>
-        
-        <p className="text-sm text-stone-400 leading-relaxed line-clamp-3">
-          {project.description}
-        </p>
-      </div>
-      
-      <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
-        {project.tech.map((t, i) => (
-          <span 
-            key={i}
-            className="text-[10px] px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-stone-400 group-hover:border-white/10 transition-colors"
+        <motion.div
+          className="pl-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.12 }}
+        >
+          <motion.div initial={{ x: -10 }} animate={{ x: 0 }} className="py-0.5">
+            <span className="text-amber-600">"name"</span>:{" "}
+            <span className="text-stone-900">"{personalInfo.name}"</span>,
+          </motion.div>
+
+          <motion.div
+            initial={{ x: -10 }}
+            animate={{ x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="py-0.5"
           >
-            {t}
-          </span>
-        ))}
+            <span className="text-amber-600">"age"</span>:{" "}
+            <span className="text-lavender-600 font-medium">{age}</span>,
+          </motion.div>
+
+          <motion.div
+            initial={{ x: -10 }}
+            animate={{ x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="py-0.5"
+          >
+            <span className="text-amber-600">"status"</span>:{" "}
+            <span className="text-stone-900">"Wong Mumet"</span>,
+          </motion.div>
+
+          <motion.div
+            initial={{ x: -10 }}
+            animate={{ x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="py-0.5"
+          >
+            <span className="text-amber-600">"stack"</span>:{" "}
+            <span className="text-lavender-600">[</span>
+
+            <div className="inline ml-1">
+              {stackList.map((item, i) => (
+                <motion.span
+                  key={i}
+                  animate={{ opacity: item.opacityCycle }}
+                  transition={{
+                    duration: 4.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: i * 0.4
+                  }}
+                  className="inline-block ml-1 font-medium"
+                  style={{ color: item.color }}
+                >
+                  "{item.name}"
+                  {i < stackList.length - 1 && (
+                    <span className="text-lavender-600">,</span>
+                  )}
+                </motion.span>
+              ))}
+            </div>
+
+            <span className="text-lavender-600 ml-1">]</span>
+          </motion.div>
+        </motion.div>
+
+        <span className="text-lavender-600">{`}`}</span>
       </div>
     </motion.div>
   );
 };
+
+const ProjectCard = ({ project, active }: { project: Project; active: boolean }) => (
+  <motion.div
+    animate={{
+      scale: active ? 1 : 0.95,
+      opacity: active ? 1 : 0.5,
+    }}
+    transition={{ duration: 0.4 }}
+    className={`group relative h-full flex flex-col justify-between p-6 bg-gradient-to-br rounded-2xl border transition-all duration-500 overflow-hidden ${
+      active 
+        ? "from-white/80 to-stone-50/90 border-lavender-300/50 shadow-2xl shadow-lavender-200/30" 
+        : "from-white/50 to-stone-50/70 border-lavender-100/30"
+    }`}
+  >
+    <div className={`absolute inset-0 bg-gradient-to-br transition-opacity duration-500 ${
+      active 
+        ? "opacity-20 from-lavender-200/40 via-transparent to-pink-100/30" 
+        : "opacity-0"
+    }`}></div>
+    
+    <div>
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <span className="text-[10px] font-bold tracking-widest text-lavender-600 uppercase bg-gradient-to-r from-lavender-100/80 to-pink-100/60 px-3 py-1.5 rounded-full border border-lavender-200/50">
+          {project.category}
+        </span>
+        <a href={project.url} target="_blank" className="z-20">
+          <motion.div whileHover={{ rotate: 90, scale: 1.2 }} transition={{ duration: 0.2 }}>
+            <ExternalLink size={16} className="text-stone-500 group-hover:text-lavender-500 transition-colors" />
+          </motion.div>
+        </a>
+      </div>
+      
+      <h3 className={`text-xl font-bold mb-3 transition-colors relative ${
+        active ? "text-stone-800 group-hover:text-lavender-700" : "text-stone-600"
+      }`}>
+        {project.title}
+      </h3>
+      
+      <p className={`text-sm mb-5 leading-relaxed transition-all duration-300 line-clamp-3 ${
+        active ? "text-stone-600" : "text-stone-500 text-xs"
+      }`}>{project.description}</p>
+    </div>
+    
+    <div className="flex flex-wrap gap-2 relative z-10">
+      {project.tech.map((t, i) => (
+        <span 
+          key={i}
+          className={`text-[10px] px-3 py-1 rounded-full uppercase transition-all ${
+            active 
+              ? "text-stone-600 border border-stone-300 bg-white/60 group-hover:border-lavender-300" 
+              : "text-stone-500 border border-stone-200 bg-white/40"
+          }`}
+        >
+          {t}
+        </span>
+      ))}
+    </div>
+  </motion.div>
+);
 
 const ProjectCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isPaused) return;
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % projects.length);
-    }, 4000); // Slower interval for better readability
+    }, 3000);
+
     return () => clearInterval(interval);
   }, [isPaused]);
 
+  const handleDragEnd = (event: any, info: any) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold && currentIndex < projects.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else if (info.offset.x > threshold && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+    setTimeout(() => setIsPaused(false), 1000);
+  };
+
   return (
     <div 
-      className="w-full relative py-8" 
+      className="w-full relative px-4" 
+      ref={carouselRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="overflow-hidden w-full max-w-4xl mx-auto">
+      <div className="overflow-hidden w-full max-w-4xl mx-auto py-8">
         <motion.div
-          className="flex"
-          animate={{ x: `calc(-${currentIndex} * 100%)` }} 
-          transition={{ type: "spring", stiffness: 100, damping: 20 }}
+          className="flex gap-4 md:gap-8"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          onDragStart={() => setIsPaused(true)}
+          onDragEnd={handleDragEnd}
+          initial={false}
+          animate={{ x: `calc(-${currentIndex} * (100% + 1rem))` }} 
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 25,
+            mass: 0.8
+          }}
+          style={{ cursor: "grab", width: "100%" }}
+          whileTap={{ cursor: "grabbing" }}
         >
           {projects.map((project, index) => (
-            <div key={index} className="w-full flex-shrink-0 px-2 md:px-12">
+            <motion.div 
+              key={index} 
+              className="w-full md:w-[45%] flex-shrink-0"
+              style={{ pointerEvents: "auto" }}
+            >
               <ProjectCard project={project} active={currentIndex === index} />
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </div>
 
-      {/* Pagination Dots */}
-      <div className="flex justify-center gap-3 mt-8">
+      <div className="flex justify-center items-center gap-2 mt-4">
         {projects.map((_, index) => (
-          <button key={index} onClick={() => setCurrentIndex(index)} className="group p-2">
-            <div className={`h-1.5 rounded-full transition-all duration-500 ${
-              index === currentIndex 
-                ? "w-8 bg-gradient-to-r from-amber-400 to-rose-400" 
-                : "w-2 bg-stone-800 group-hover:bg-stone-700"
-            }`} />
+          <button key={index} onClick={() => setCurrentIndex(index)} className="focus:outline-none p-2">
+            <motion.div
+              className={`h-1.5 rounded-full transition-colors duration-300 ${
+                index === currentIndex 
+                  ? "bg-lavender-500 w-8" 
+                  : "bg-stone-300 w-2 hover:bg-stone-400"
+              }`}
+            />
           </button>
         ))}
       </div>
@@ -462,128 +732,193 @@ const ProjectCarousel = () => {
   );
 };
 
-// --- MAIN PAGE ---
+const SocialMediaButtons = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex justify-center gap-4 md:gap-6 mt-8 flex-wrap px-4"
+    >
+      {socialMedia.map((social, index) => (
+        <motion.a
+          key={social.name}
+          href={social.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.15, y: -5 }}
+          whileTap={{ scale: 0.9 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+          className={`p-3 md:p-4 rounded-2xl ${social.bgColor} backdrop-blur-sm border border-stone-200/50 ${social.color} transition-all duration-300 group relative overflow-hidden`}
+        >
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-current transition-opacity duration-300"></div>
+          <social.icon size={22} className="text-stone-600 group-hover:text-current transition-colors duration-300 relative z-10" />
+          <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-[10px] font-medium opacity-0 group-hover:opacity-100 group-hover:bottom-[-25px] transition-all duration-300 whitespace-nowrap text-stone-700">
+            {social.name}
+          </span>
+        </motion.a>
+      ))}
+    </motion.div>
+  );
+};
 
 export default function Portfolio() {
   return (
-    <div className="min-h-screen bg-[#0c0a09] text-stone-200 selection:bg-rose-500/30 selection:text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAFAF9] text-stone-700 selection:bg-lavender-200/50 font-sans overflow-x-hidden">
       
       <CanvasBackground />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 py-12 md:py-24">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-20">
         
-        {/* Navigation */}
         <motion.nav 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="flex justify-between items-center mb-24"
+          className="flex justify-between items-center mb-20 md:mb-32 backdrop-blur-sm bg-white/70 rounded-full p-3 border border-stone-200/50"
         >
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-black font-bold text-sm">
-                DS
-            </div>
-            <span className="font-semibold tracking-tight text-stone-300">Dandi Saputra</span>
+          <motion.span 
+            className="text-xl font-black tracking-tighter text-stone-800"
+            whileHover={{ scale: 1.05 }}
+          >
+            DANDI<span className="text-lavender-500">.</span>
+          </motion.span>
+          <div className="flex gap-5">
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.9 }}>
+              <Github size={20} className="text-stone-500 hover:text-lavender-500 transition-colors cursor-pointer" />
+            </motion.div>
           </div>
-          <a href="https://github.com/DanzzAraAra" target="_blank" className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-            <Github size={20} className="text-stone-400" />
-          </a>
         </motion.nav>
 
-        {/* Hero Section */}
-        <section className="flex flex-col gap-12 mb-32">
-          <div className="grid md:grid-cols-5 gap-12 items-center">
-            
+        <section className="flex flex-col gap-12 mb-20 md:mb-32">
+          <div className="grid md:grid-cols-5 gap-8 md:gap-10 items-center">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.6 }}
               className="md:col-span-3 order-2 md:order-1"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-amber-300 mb-6">
-                <Sparkles size={12} />
-                <span>Backend Enthusiast</span>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-4 md:mb-6 tracking-tighter text-stone-800 leading-[0.9]">
+                  BACKEND <br />
+                  <motion.span 
+                    className="text-transparent bg-clip-text bg-gradient-to-r from-lavender-500 via-pink-400 to-blue-400"
+                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                    style={{ backgroundSize: "200% 100%" }}
+                  >
+                    DEVELOPER
+                  </motion.span>
+                </h1>
+              </motion.div>
               
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tighter text-white leading-[1.1]">
-                Designing <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-rose-300 to-purple-300">
-                  Invisible Systems
-                </span>
-              </h1>
-              
-              <p className="text-stone-400 text-lg leading-relaxed max-w-xl mb-8">
-                Hi, saya Dandi. Saya membangun arsitektur backend yang aman dan efisien. 
-                Mengubah logika kompleks menjadi API yang elegan menggunakan teknologi modern.
-              </p>
-
-              <div className="flex gap-4">
-                 <button className="px-6 py-3 rounded-full bg-stone-100 text-stone-900 font-semibold hover:bg-white transition-colors">
-                    Explore Projects
-                 </button>
-                 <button className="px-6 py-3 rounded-full border border-stone-800 text-stone-400 hover:border-stone-600 hover:text-stone-200 transition-all">
-                    Contact Me
-                 </button>
-              </div>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-stone-600 text-base md:text-lg max-w-xl leading-relaxed"
+              >
+                Hi, I'm <span className="font-semibold">Dandi Eka Saputra</span> — usually called <span className="font-semibold">Dandi</span>. 
+                I'm a Backend Developer specializing in building robust server-side systems and efficient data pipelines. 
+                With expertise in <span className="text-[#3B82F6] font-medium">TypeScript</span>, <span className="text-[#F59E0B] font-medium">JavaScript</span>, and <span className="text-[#4F46E5] font-medium">Go</span>, 
+                I architect scalable solutions that handle high-concurrency demands. 
+                I leverage <span className="text-[#047857] font-medium">MongoDB</span> for database backend to create flexible, 
+                high-performance data storage solutions. Passionate about clean code, system optimization, 
+                and continuously learning new technologies to solve complex problems.
+              </motion.p>
             </motion.div>
 
-            {/* Profile Widget Area */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="md:col-span-2 order-1 md:order-2 flex flex-col gap-6"
+              initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.6, type: "spring" }}
+              className="md:col-span-2 order-1 md:order-2"
             >
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-rose-500/20 rounded-3xl blur-2xl group-hover:opacity-100 opacity-50 transition-opacity duration-700"></div>
-                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl aspect-[16/10]">
-                    <img src={personalInfo.heroGif} alt="Hero" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-80"></div>
-                </div>
-              </div>
-              <JsonProfile />
+              <motion.div 
+                className="relative aspect-[16/10] bg-gradient-to-br from-white to-stone-100 rounded-3xl overflow-hidden border border-lavender-200/50 shadow-2xl shadow-lavender-100/30 cursor-pointer"
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="absolute inset-0 border-2 border-transparent group-hover:border-lavender-300/30 rounded-3xl transition-all duration-500"></div>
+                <motion.img 
+                  src={personalInfo.heroGif} 
+                  alt="Work Atmosphere" 
+                  className="w-full h-full object-cover opacity-90"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.4 }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-transparent opacity-60"></div>
+              </motion.div>
             </motion.div>
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="w-full grid md:grid-cols-2 gap-6"
+          >
+            <JsonProfile />
+            <div className="flex justify-center md:justify-end">
+               <MusicPlayer />
+            </div>
+          </motion.div>
         </section>
 
-        {/* Projects Section */}
-        <section className="mb-32">
-          <div className="flex flex-col items-center mb-12 text-center">
-            <h2 className="text-3xl font-bold text-white mb-2">Featured Projects</h2>
-            <p className="text-stone-500">Kumpulan proyek terbaru yang telah saya kerjakan</p>
-          </div>
+        <section>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 mb-8 md:mb-12"
+          >
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                className="p-2 bg-gradient-to-br from-lavender-100/50 to-pink-100/30 rounded-lg border border-lavender-200/50"
+              >
+                <Code2 size={20} className="text-lavender-500" />
+              </motion.div>
+              <h2 className="text-xl md:text-2xl font-bold text-stone-800">My Project</h2>
+            </div>
+            <div className="h-[2px] flex-grow bg-gradient-to-r from-lavender-200/60 via-stone-300/60 to-transparent" />
+          </motion.div>
+
           <ProjectCarousel />
         </section>
 
-        {/* Music & Socials Combined */}
-        <section className="grid md:grid-cols-2 gap-12 items-center mb-20">
-           <div>
-              <h3 className="text-2xl font-bold mb-6">Current Vibe</h3>
-              <MusicPlayer />
-           </div>
-           
-           <div>
-              <h3 className="text-2xl font-bold mb-6">Let's Connect</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {socialMedia.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.url}
-                    target="_blank"
-                    className={`p-4 rounded-xl border border-stone-800 bg-stone-900/30 flex items-center gap-3 transition-all duration-300 group ${social.bgColor}`}
-                  >
-                    <social.icon size={20} className={`text-stone-400 transition-colors ${social.color}`} />
-                    <span className="text-sm font-medium text-stone-400 group-hover:text-stone-200">{social.name}</span>
-                  </a>
-                ))}
-              </div>
-           </div>
+        <section className="mt-20 md:mt-40">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="text-center"
+          >
+            <h3 className="text-lg md:text-xl font-bold text-stone-800 mb-4 md:mb-6">Connect With Me</h3>
+            <SocialMediaButtons />
+          </motion.div>
         </section>
 
-        <footer className="pt-10 border-t border-stone-900 text-center">
-          <p className="text-stone-600 text-xs tracking-widest uppercase">
-            © {new Date().getFullYear()} Dandi Eka Saputra
+        <motion.footer 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          className="mt-12 md:mt-20 text-center py-8 md:py-10 border-t border-stone-200/50"
+        >
+          <p className="text-stone-500 text-[10px] tracking-[0.3em] uppercase">
+            © • {new Date().getFullYear()} • DANDI
           </p>
-        </footer>
+          <motion.div 
+            className="flex justify-center gap-1 mt-2"
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-1 h-1 rounded-full bg-lavender-400/50"></div>
+            <div className="w-1 h-1 rounded-full bg-pink-300/50"></div>
+            <div className="w-1 h-1 rounded-full bg-blue-300/50"></div>
+          </motion.div>
+        </motion.footer>
 
       </div>
     </div>
